@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pharr Way Learning Platform — 2026 Baldrige Application</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy-deep:#0D1D41; --navy-2:#0f1d44; --navy-3:#1c3968; --navy-4:#002a5a;
+  --blue-mid:#3d81c3; --blue-steel:#6a98c6; --blue-sky:#2faae1; --blue-ice:#81d2e8;
+  --royal:#0010e4; --olive:#9bc13c; --slate:#3f4144; --grey:#9d9fa2;
+  --gold:#f3c300; --gold-2:#f2c127; --gold-3:#f9be29; --cream:#fdfbe3; --white:#ffffff;
+  --correct:#9bc13c; --wrong:#ff3b3b;
+}
+html,body{min-height:100%;font-family:'Barlow',sans-serif;background:var(--navy-deep);color:var(--white);}
+body{display:flex;min-height:100vh;}
+img{max-width:100%;display:block;border-radius:10px;}
+
+.screen{display:none;min-height:100vh;width:100%;}
+.screen.active{display:flex;}
+
+/* ===== Landing / Name Entry ===== */
+#screen-landing{
+  justify-content:center;align-items:center;flex-direction:column;
+  background:radial-gradient(ellipse at 50% 20%,#12227a,#081046 55%,#050a30);
+  padding:2rem;gap:1.6rem;text-align:center;
+}
+.landing-logo .eyebrow{font-size:.75rem;letter-spacing:.25em;color:var(--grey);margin-bottom:.3rem;}
+.landing-logo h1{font-family:'Anton',sans-serif;font-size:clamp(2.4rem,7vw,4rem);letter-spacing:.04em;color:var(--gold);text-shadow:0 0 30px rgba(243,195,0,.4);line-height:1.02;}
+.landing-logo h2{font-family:'Barlow',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.2em;color:var(--blue-ice);margin-top:.5rem;}
+.landing-box{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:1.8rem;width:100%;max-width:420px;}
+.landing-box label{display:block;font-size:.72rem;letter-spacing:.1em;color:var(--grey);margin-bottom:.5rem;text-align:left;}
+.landing-input{
+  width:100%;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.2);border-radius:10px;
+  padding:.85rem 1rem;color:var(--white);font-family:'Barlow',sans-serif;font-size:1.05rem;font-weight:600;
+  margin-bottom:1rem;outline:none;
+}
+.landing-input:focus{border-color:var(--gold);}
+.btn-enter{
+  width:100%;background:linear-gradient(135deg,var(--gold),var(--gold-3));border:none;border-radius:12px;
+  padding:1rem;color:#1a0800;font-family:'Anton',sans-serif;font-size:1.4rem;letter-spacing:.1em;
+  cursor:pointer;transition:all .2s;
+}
+.btn-enter:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(243,195,0,.4);}
+.landing-status{font-size:.78rem;color:var(--grey);min-height:1.2em;}
+
+/* ===== Layout shell (dashboard + tour + quiz share sidebar) ===== */
+#screen-app{width:100%;}
+.app-shell{display:flex;width:100%;min-height:100vh;}
+.sidebar{
+  width:270px;flex-shrink:0;background:rgba(0,0,0,.28);border-right:1px solid rgba(255,255,255,.08);
+  padding:1.3rem 1rem;position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+.brand{margin-bottom:1.2rem;}
+.brand .eyebrow{font-size:.6rem;letter-spacing:.16em;color:var(--grey);margin-bottom:.2rem;}
+.brand h1{font-family:'Anton',sans-serif;font-size:1.35rem;letter-spacing:.04em;color:var(--gold);line-height:1.05;}
+.user-chip{
+  display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;padding:.5rem .7rem;margin-bottom:1.2rem;font-size:.8rem;font-weight:700;
+}
+.user-dot{width:8px;height:8px;border-radius:50%;background:var(--olive);flex-shrink:0;}
+.progress-wrap{margin-bottom:1.2rem;}
+.progress-label{font-size:.62rem;letter-spacing:.1em;color:var(--grey);margin-bottom:.35rem;display:flex;justify-content:space-between;}
+.progress-track{height:7px;background:rgba(255,255,255,.08);border-radius:5px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-3));border-radius:5px;transition:width .5s ease;}
+.nav-list{display:flex;flex-direction:column;gap:.3rem;margin-bottom:1rem;}
+.nav-item{display:flex;align-items:center;gap:.55rem;padding:.5rem .55rem;border-radius:8px;cursor:pointer;border:1px solid transparent;transition:all .15s;font-size:.79rem;font-weight:600;color:#c9d2e4;}
+.nav-item:hover{background:rgba(255,255,255,.05);}
+.nav-item.active{background:rgba(243,195,0,.1);border-color:rgba(243,195,0,.3);color:var(--gold);}
+.nav-num{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Anton',sans-serif;font-size:.62rem;background:rgba(255,255,255,.08);color:var(--grey);}
+.nav-item.active .nav-num{background:var(--gold);color:var(--navy-deep);}
+.nav-item.done .nav-num{background:var(--olive);color:var(--navy-deep);font-size:0;}
+.nav-item.done .nav-num::before{content:'✓';font-size:.66rem;}
+.nav-divider{height:1px;background:rgba(255,255,255,.1);margin:.7rem 0;}
+.nav-special{display:flex;align-items:center;gap:.55rem;padding:.55rem;border-radius:8px;cursor:pointer;font-size:.79rem;font-weight:700;color:var(--blue-ice);border:1px solid rgba(129,210,232,.25);background:rgba(129,210,232,.06);margin-bottom:.4rem;}
+.nav-special:hover{background:rgba(129,210,232,.12);}
+.nav-special.exam{color:var(--gold);border-color:rgba(243,195,0,.3);background:rgba(243,195,0,.07);}
+.nav-special.exam:hover{background:rgba(243,195,0,.14);}
+.nav-special.cert{color:var(--olive);border-color:rgba(155,193,60,.3);background:rgba(155,193,60,.07);}
+
+/* ===== Main content ===== */
+.main{flex:1;min-width:0;}
+.pane{display:none;padding:2.2rem clamp(1.2rem,4vw,3.2rem);max-width:880px;margin:0 auto;}
+.pane.active{display:block;}
+
+/* Dashboard */
+.dash-title{font-family:'Anton',sans-serif;font-size:clamp(1.8rem,4vw,2.5rem);color:var(--gold);letter-spacing:.03em;margin-bottom:.4rem;}
+.dash-sub{color:var(--blue-ice);font-size:.92rem;margin-bottom:1.8rem;line-height:1.5;}
+.dash-cards{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.8rem;}
+@media(max-width:600px){.dash-cards{grid-template-columns:1fr;}}
+.dash-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:1.2rem 1.4rem;}
+.dash-card h3{font-family:'Anton',sans-serif;font-size:1.05rem;color:var(--white);margin-bottom:.3rem;}
+.dash-card p{font-size:.8rem;color:var(--grey);line-height:1.5;}
+.dash-card .big{font-family:'Anton',sans-serif;font-size:2.1rem;color:var(--gold);}
+.module-row-list{display:flex;flex-direction:column;gap:.6rem;}
+.module-row{
+  display:flex;align-items:center;gap:1rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;padding:.9rem 1.1rem;cursor:pointer;transition:all .15s;
+}
+.module-row:hover{background:rgba(255,255,255,.07);border-color:rgba(243,195,0,.3);}
+.mr-num{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-family:'Anton',sans-serif;font-size:.9rem;color:var(--grey);flex-shrink:0;}
+.module-row.done .mr-num{background:var(--olive);color:var(--navy-deep);font-size:0;}
+.module-row.done .mr-num::before{content:'✓';font-size:1rem;}
+.mr-text{flex:1;}
+.mr-text h4{font-size:.92rem;font-weight:700;}
+.mr-text span{font-size:.72rem;color:var(--grey);}
+.mr-arrow{color:var(--gold);font-size:1.1rem;}
+
+/* Guided tour */
+.tour-eyebrow{font-size:.7rem;letter-spacing:.2em;color:var(--gold);font-weight:700;margin-bottom:.4rem;}
+.tour-title{font-family:'Anton',sans-serif;font-size:clamp(1.6rem,4vw,2.3rem);color:var(--white);margin-bottom:1.5rem;}
+.slide-progress{font-size:.72rem;letter-spacing:.08em;color:var(--grey);margin-bottom:1rem;}
+.slide-track{height:5px;background:rgba(255,255,255,.08);border-radius:4px;margin-bottom:1.6rem;overflow:hidden;}
+.slide-track-fill{height:100%;background:var(--gold);border-radius:4px;transition:width .3s ease;}
+.slide-heading{font-family:'Barlow',sans-serif;font-weight:700;font-size:1.25rem;color:var(--gold);margin-bottom:.7rem;}
+.slide-text{font-size:.95rem;line-height:1.7;color:#e3e8f2;margin-bottom:1.2rem;}
+.slide-img-wrap{margin-bottom:1.2rem;border:1px solid rgba(255,255,255,.12);border-radius:12px;overflow:hidden;background:#fff;}
+.slide-fig-label{font-size:.68rem;letter-spacing:.06em;color:var(--grey);margin-bottom:1.5rem;}
+.tour-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1rem;gap:1rem;}
+.btn-nav{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:.7rem 1.3rem;color:var(--white);font-family:'Barlow',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s;}
+.btn-nav:hover{background:rgba(255,255,255,.12);}
+.btn-nav:disabled{opacity:.3;cursor:default;}
+.btn-nav.primary{background:linear-gradient(135deg,var(--gold),var(--gold-3));border:none;color:#1a0800;}
+
+.results-highlight-box{background:rgba(155,193,60,.06);border:1px solid rgba(155,193,60,.25);border-radius:14px;padding:1.3rem 1.4rem;margin:1.6rem 0;}
+.results-highlight-box h4{font-family:'Anton',sans-serif;color:var(--olive);font-size:1.05rem;margin-bottom:.8rem;}
+.rh-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
+@media(max-width:600px){.rh-grid{grid-template-columns:1fr;}}
+.rh-item img{border-radius:8px;}
+.rh-item span{display:block;font-size:.68rem;color:var(--grey);margin-top:.3rem;}
+
+.quiz-cta{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;background:linear-gradient(135deg,rgba(243,195,0,.08),rgba(0,16,228,.06));border:1px solid rgba(243,195,0,.25);border-radius:14px;padding:1.3rem 1.5rem;margin-top:1.5rem;}
+.quiz-cta-text h4{font-family:'Anton',sans-serif;font-size:1.1rem;color:var(--white);margin-bottom:.2rem;}
+.quiz-cta-text p{font-size:.8rem;color:var(--grey);}
+.btn-quiz{background:linear-gradient(135deg,var(--gold),var(--gold-3));border:none;border-radius:10px;padding:.7rem 1.5rem;color:#1a0800;font-family:'Anton',sans-serif;font-size:1rem;letter-spacing:.05em;cursor:pointer;white-space:nowrap;}
+
+/* Results Library */
+.lib-cat-title{font-family:'Anton',sans-serif;font-size:1.2rem;color:var(--gold);margin:1.6rem 0 .8rem;}
+.lib-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;}
+@media(max-width:600px){.lib-grid{grid-template-columns:1fr;}}
+.lib-item{background:#fff;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.1);}
+.lib-item span{display:block;background:var(--navy-3);color:var(--blue-ice);font-size:.7rem;padding:.4rem .6rem;}
+
+/* Quiz + Exam overlay */
+.quiz-overlay{display:none;position:fixed;inset:0;z-index:80;background:rgba(2,4,30,.92);align-items:center;justify-content:center;padding:1.2rem;overflow-y:auto;}
+.quiz-overlay.active{display:flex;}
+.quiz-box{background:linear-gradient(160deg,var(--navy-4),var(--navy-deep));border:2px solid var(--gold);border-radius:18px;padding:2rem;width:100%;max-width:620px;box-shadow:0 0 60px rgba(243,195,0,.2);position:relative;margin:auto;}
+.quiz-progress{font-size:.7rem;letter-spacing:.1em;color:var(--grey);margin-bottom:.6rem;font-weight:700;}
+.quiz-question{font-size:1.1rem;font-weight:600;line-height:1.5;margin-bottom:1.3rem;color:var(--white);}
+.quiz-options{display:flex;flex-direction:column;gap:.55rem;margin-bottom:1.1rem;}
+.quiz-opt{text-align:left;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.15);border-radius:10px;padding:.7rem 1rem;color:var(--white);font-family:'Barlow',sans-serif;font-size:.9rem;cursor:pointer;transition:all .15s;}
+.quiz-opt:hover:not(:disabled){border-color:var(--gold);background:rgba(243,195,0,.08);}
+.quiz-opt.correct{background:rgba(155,193,60,.18);border-color:var(--correct);}
+.quiz-opt.wrong{background:rgba(255,59,59,.14);border-color:var(--wrong);}
+.quiz-opt:disabled{cursor:default;}
+.quiz-explain{display:none;font-size:.83rem;line-height:1.55;color:var(--blue-ice);background:rgba(255,255,255,.05);border-left:3px solid var(--gold);border-radius:6px;padding:.65rem .85rem;margin-bottom:1.1rem;}
+.quiz-explain.active{display:block;}
+.quiz-actions{display:flex;justify-content:space-between;align-items:center;}
+.quiz-score{font-size:.78rem;color:var(--grey);font-weight:600;}
+.btn-quiz-next{background:var(--gold);border:none;border-radius:8px;padding:.55rem 1.2rem;color:var(--navy-deep);font-family:'Barlow',sans-serif;font-weight:700;font-size:.83rem;cursor:pointer;display:none;}
+.btn-quiz-next.active{display:block;}
+.btn-quiz-close{position:absolute;top:1rem;right:1.1rem;background:none;border:none;color:var(--grey);font-size:1.3rem;cursor:pointer;line-height:1;}
+.quiz-result{text-align:center;}
+.quiz-result h3{font-family:'Anton',sans-serif;font-size:1.8rem;color:var(--gold);margin-bottom:.5rem;}
+.quiz-result p{color:var(--blue-ice);font-size:.9rem;margin-bottom:1.3rem;}
+.btn-quiz-done{background:linear-gradient(135deg,var(--olive),#7a9e2e);border:none;border-radius:10px;padding:.75rem 1.8rem;color:#0a1400;font-family:'Anton',sans-serif;font-size:1.05rem;letter-spacing:.05em;cursor:pointer;}
+.quiz-result.pass h3{color:var(--olive);}
+.quiz-result.fail h3{color:var(--wrong);}
+
+/* Certificate */
+.cert-wrap{display:flex;flex-direction:column;align-items:center;padding:3rem 1.5rem;}
+.cert-card{
+  background:linear-gradient(160deg,#fdfbe3,#fff);color:var(--navy-deep);border-radius:6px;
+  border:10px solid var(--gold); padding:3rem 2.5rem;max-width:640px;width:100%;text-align:center;position:relative;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+}
+.cert-seal{font-family:'Anton',sans-serif;font-size:.7rem;letter-spacing:.3em;color:var(--navy-3);margin-bottom:.6rem;}
+.cert-card h2{font-family:'Anton',sans-serif;font-size:2.2rem;letter-spacing:.04em;color:var(--navy-deep);margin-bottom:.3rem;}
+.cert-card .sub{font-size:.85rem;letter-spacing:.15em;color:var(--gold-2);font-weight:700;margin-bottom:1.6rem;}
+.cert-name{font-family:'Anton',sans-serif;font-size:2rem;color:var(--royal);border-bottom:2px solid var(--navy-3);display:inline-block;padding:0 1rem .3rem;margin-bottom:1.2rem;}
+.cert-body{font-size:.9rem;line-height:1.7;color:#333;margin-bottom:1.4rem;}
+.cert-meta{display:flex;justify-content:center;gap:2rem;font-size:.78rem;color:var(--navy-3);font-weight:700;}
+.cert-actions{margin-top:1.6rem;display:flex;gap:.8rem;}
+.btn-print{background:var(--navy-deep);border:none;border-radius:10px;padding:.75rem 1.6rem;color:var(--gold);font-family:'Barlow',sans-serif;font-weight:700;cursor:pointer;}
+
+/* Roster */
+.roster-table{width:100%;border-collapse:collapse;margin-top:1rem;}
+.roster-table th{text-align:left;font-size:.68rem;letter-spacing:.08em;color:var(--grey);padding:.6rem .8rem;border-bottom:1px solid rgba(255,255,255,.15);}
+.roster-table td{padding:.7rem .8rem;font-size:.85rem;border-bottom:1px solid rgba(255,255,255,.06);}
+.badge{display:inline-block;padding:.2rem .6rem;border-radius:20px;font-size:.68rem;font-weight:700;}
+.badge.certified{background:rgba(155,193,60,.15);color:var(--olive);border:1px solid rgba(155,193,60,.3);}
+.badge.progress{background:rgba(243,195,0,.12);color:var(--gold);border:1px solid rgba(243,195,0,.3);}
+
+@media(max-width:760px){
+  .app-shell{flex-direction:column;}
+  .sidebar{width:100%;height:auto;position:relative;}
+}
+@media(prefers-reduced-motion:reduce){.progress-fill,.slide-track-fill,.quiz-opt,.btn-nav{transition:none;}}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ LANDING ═══════════ -->
+<div class="screen active" id="screen-landing">
+  <div class="landing-logo">
+    <div class="eyebrow">CITY OF PHARR · OFFICE OF STRATEGIC EXCELLENCE</div>
+    <h1>PHARR WAY<br>LEARNING PLATFORM</h1>
+    <h2>2026 BALDRIGE APPLICATION · GUIDED COURSE &amp; CERTIFICATION</h2>
+  </div>
+  <div class="landing-box">
+    <label for="name-input">ENTER YOUR NAME TO BEGIN OR RESUME</label>
+    <input class="landing-input" id="name-input" type="text" placeholder="e.g. Jordan Ramirez" autocomplete="off">
+    <button class="btn-enter" onclick="handleEnter()">ENTER</button>
+    <div class="landing-status" id="landing-status"></div>
+  </div>
+</div>
+
+<!-- ═══════════ APP SHELL ═══════════ -->
+<div class="screen" id="screen-app">
+  <div class="app-shell">
+    <nav class="sidebar">
+      <div class="brand">
+        <div class="eyebrow">CITY OF PHARR · OSE</div>
+        <h1>PHARR WAY<br>LEARNING PLATFORM</h1>
+      </div>
+      <div class="user-chip"><div class="user-dot"></div><span id="user-chip-name">—</span></div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>COURSE PROGRESS</span><span id="progress-pct">0%</span></div>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      </div>
+      <div class="nav-list" id="nav-list"></div>
+      <div class="nav-divider"></div>
+      <div class="nav-special" onclick="showPane('dashboard')">🏠 Dashboard</div>
+      <div class="nav-special" onclick="showPane('library')">📊 Results Library</div>
+      <div class="nav-special exam" onclick="showPane('exam-intro')">🎓 Final Exam</div>
+      <div class="nav-special cert" id="nav-cert" style="display:none" onclick="showPane('certificate')">🏆 My Certificate</div>
+      <div class="nav-special" onclick="showPane('roster')">👥 OSE Roster</div>
+    </nav>
+
+    <main class="main">
+      <!-- DASHBOARD -->
+      <section class="pane" id="pane-dashboard">
+        <div class="dash-title">Welcome back<span id="dash-name-suffix"></span></div>
+        <div class="dash-sub">Work through each module's guided tour and quiz at your own pace, or skip straight to the Final Exam if you're confident. Your progress saves automatically.</div>
+        <div class="dash-cards">
+          <div class="dash-card"><h3>Modules Complete</h3><div class="big" id="dash-modules-done">0/8</div><p>Guided tour + quiz passed</p></div>
+          <div class="dash-card"><h3>Status</h3><div class="big" id="dash-status" style="font-size:1.3rem;">In Progress</div><p id="dash-status-sub">Keep going!</p></div>
+        </div>
+        <div class="module-row-list" id="dash-module-list"></div>
+      </section>
+
+      <!-- MODULE TOUR PANES get injected here -->
+      <div id="tour-panes"></div>
+
+      <!-- RESULTS LIBRARY -->
+      <section class="pane" id="pane-library">
+        <div class="dash-title">Results Library</div>
+        <div class="dash-sub">Every result chart behind the guided tour, organized by category. Browse anytime — none of this is required for the exam.</div>
+        <div id="library-content"></div>
+      </section>
+
+      <!-- EXAM INTRO -->
+      <section class="pane" id="pane-exam-intro">
+        <div class="dash-title">Final Exam</div>
+        <div class="dash-sub">25 questions pulled from all 8 modules. Score 80% or higher to earn your Pharr Way Certification. You can retake it as many times as you need.</div>
+        <div class="dash-card" style="margin-bottom:1.5rem;">
+          <h3>Best score so far</h3>
+          <div class="big" id="exam-best-score">—</div>
+        </div>
+        <button class="btn-quiz" onclick="startExam()">BEGIN FINAL EXAM</button>
+      </section>
+
+      <!-- CERTIFICATE -->
+      <section class="pane" id="pane-certificate">
+        <div class="cert-wrap">
+          <div class="cert-card">
+            <div class="cert-seal">CITY OF PHARR · OFFICE OF STRATEGIC EXCELLENCE</div>
+            <h2>Certificate of Completion</h2>
+            <div class="sub">PHARR WAY CERTIFICATION</div>
+            <div class="cert-name" id="cert-name">—</div>
+            <div class="cert-body">has successfully completed the Pharr Way Learning Platform course and passed the Final Exam on the 2026 Baldrige National Quality Award Application, demonstrating working knowledge of the City's key organizational processes.</div>
+            <div class="cert-meta">
+              <div>SCORE<br><strong id="cert-score">—</strong></div>
+              <div>DATE<br><strong id="cert-date">—</strong></div>
+            </div>
+          </div>
+          <div class="cert-actions">
+            <button class="btn-print" onclick="window.print()">🖨 Print / Save as PDF</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ROSTER -->
+      <section class="pane" id="pane-roster">
+        <div class="dash-title">OSE Roster</div>
+        <div class="dash-sub">Shared progress across everyone who has used this platform. Visible to all users.</div>
+        <table class="roster-table">
+          <thead><tr><th>NAME</th><th>MODULES</th><th>STATUS</th><th>LAST ACTIVE</th></tr></thead>
+          <tbody id="roster-body"></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- Quiz / Exam overlay (shared) -->
+<div class="quiz-overlay" id="quiz-overlay">
+  <div class="quiz-box">
+    <button class="btn-quiz-close" onclick="closeQuizOverlay()">✕</button>
+    <div id="quiz-body"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONTENT DATA — 8 modules: Organizational Profile + Categories 1-7
+// Sourced from the 2026 Official City of Pharr Baldrige Award Application
+// and the "Ready to Upload" clean text drafts + official figures.
+// ═══════════════════════════════════════════════════════════
+const MODULES = [
+{
+  id:"profile", eyebrow:"ORGANIZATIONAL PROFILE", title:"Who Team Pharr Is",
+  slides:[
+    { h:"285+ Programs, Three Categories", t:"Pharr delivers 285+ programs and services across 27 departments, grouped into Infrastructure, Safety & Security, and Quality of Life. Service Excellence isn't a fourth category — it's the overarching commitment that runs across all three.", img:"assets/od-1.1-products.png", fig:"Figure OD 1.1 — Key Products, Services, and Programs" },
+    { h:"Mission, Vision, Values", t:"Mission: providing the highest level of municipal services every day. Vision: a regional leader in municipal excellence, sustainability, and innovation (currently being refined). At the heart of both sits the City's core competency: an unwavering commitment to citizens.", img:"assets/od-3.1-mvv.png", fig:"Figure OD 3.1 — Mission, Vision, Values" },
+    { h:"The Pharr Way", t:"The City's cultural framework, built on three pillars — People, Process, and Performance — all in service of \u201cExcellence Every Day.\u201d Leaders are expected to model five attributes: Inspirational, Accountable, Selfless, Adaptable, and Decisive.", img:"assets/od-4.1-pharr-way.png", fig:"Figure OD 4.1 — The Pharr Way" },
+    { h:"The Workforce", t:"847 employees across 257 unique job titles, working from 24 distinct sites. The workforce splits into two segments: union-represented civil service (Police and Fire) and non-civil service employees — each with different operational, legal, and training needs." },
+    { h:"Board of Commissioners – City Manager Government", t:"The BOC (Mayor + six at-large Commissioners, four-year staggered terms) sets policy and appoints a City Manager, who leads the Office of the City Manager along with a Deputy City Manager and two Assistant City Managers. Together with 27 Department Directors, this leadership team makes up Pharr's Senior Leaders (SLs).", img:"assets/od-9.1-governance.png", fig:"Figure OD 9.1 — Leadership and Governance Structure" },
+    { h:"Voice of the Customer", t:"Residents are Pharr's primary customer segment, split for planning purposes into North, Central, and South Pharr — each with distinct top priorities validated through the annual Budget Priority Survey (Safe & Secure Community in the North, Quality of Life in Central, Infrastructure in the South).", img:"assets/od-12.1-voc.png", fig:"Figure OD 12.1 — Voice of the Customer Process" },
+  ],
+  results:[
+    { img:"assets/od-1.3-awards.png", cap:"City of Pharr Awards and Recognition" },
+    { img:"assets/os-2.1-objectives.png", cap:"The Six Strategic Objectives (P2027 Strategic Plan)" },
+  ],
+  quiz:[
+    { q:"Pharr's programs and services group into three primary categories plus one overarching commitment. Which is the overarching commitment, not a category?", options:["Infrastructure","Service Excellence","Safety and Security","Quality of Life"], correct:1, explain:"Service Excellence runs across all three actual categories — it isn't a fourth bucket." },
+    { q:"How many employees does the City of Pharr have, across how many unique job titles?", options:["647 employees, 150 job titles","847 employees, 257 job titles","947 employees, 300 job titles","747 employees, 200 job titles"], correct:1, explain:"847 employees across 257 unique job titles — reflecting the breadth of skills municipal service requires." },
+    { q:"What form of government does the City of Pharr operate under?", options:["Mayor-Council","Board of Commissioners – City Manager","Council-Manager with elected mayor only","Commission-only government"], correct:1, explain:"A Board of Commissioners (BOC) sets policy; a City Manager runs day-to-day operations — separating governance from administration." },
+    { q:"For resident planning purposes, Pharr segments residents into three geographic areas. Which of these is one of them?", options:["East Pharr","North Pharr","West Pharr","Old Pharr"], correct:1, explain:"North, Central, and South Pharr — each with a different top budget priority per the annual survey." },
+    { q:"What are the five leadership attributes Pharr expects its leaders to model?", options:["Fast, Firm, Fair, Focused, Frank","Inspirational, Accountable, Selfless, Adaptable, Decisive","Bold, Brave, Bright, Balanced, Bipartisan","Strong, Smart, Steady, Sincere, Strategic"], correct:1, explain:"Inspirational, Accountable, Selfless, Adaptable, and Decisive." },
+  ]
+},
+{
+  id:"leadership", eyebrow:"CATEGORY 1", title:"Leadership",
+  slides:[
+    { h:"The Leadership System (LS)", t:"A 5-step system anchoring every leadership action in the City's Mission, Vision, and Values — the umbrella process everything else in this category deploys through.", img:"assets/lp-1.1-leadership-system.png", fig:"Figure LP 1.1" },
+    { h:"Two-Way Communication", t:"SLs define the message, identify audiences and timing, develop and deliver it, test for understanding, and reinforce it. Communication itself originates in the Office of the City Manager, which reinforces MVV and priorities to SLs through bi-monthly Strategic Alignment Meetings (SAMs).", img:"assets/lp-2.1-communication.png", fig:"Figure LP 2.1" },
+    { h:"Succession Planning", t:"A 7-step process identifying critical roles, preparing future leaders, and keeping leadership continuity on track. The Skills Matrix — sorting employees into ready now, 1–3 years, and 3–5 years tiers — is the cornerstone tool inside it.", img:"assets/lp-4.1-succession.png", fig:"Figure LP 4.1" },
+    { h:"Governance Accountability", t:"A structured cycle of learning spanning 2021–2025 that includes establishing the Office of Professional and Ethical Standards (OPES) in 2023 — integrated with the Leadership System and PRIDE values to enforce professional conduct.", img:"assets/lp-5.3-governance-cycles.png", fig:"Figure LP 5.3" },
+    { h:"Relationship Building Process", t:"A 7-step process built on shared goals, aligned resources, and trusted partnerships — how the City sustains its key community relationships long-term.", img:"assets/lp-6.1-relationship.png", fig:"Figure LP 6.1" },
+  ],
+  results:[
+    { img:"assets/lr-1.1-comms-satisfaction.png", cap:"Workforce Satisfaction — City Management Clearly Communicates Goals" },
+    { img:"assets/lr-2.1-audits.png", cap:"Annual External Fiscal Year Audits" },
+    { img:"assets/lr-4.4-pharrconnect-savings.png", cap:"Money Saved by PharrConnect Customers Annually" },
+  ],
+  quiz:[
+    { q:"How many steps make up the Leadership System (LS)?", options:["3","5","7","9"], correct:1, explain:"5 steps — the umbrella framework anchoring leadership action in the MVV." },
+    { q:"How often do Senior Leaders and the Office of the City Manager hold Strategic Alignment Meetings (SAMs)?", options:["Weekly","Bi-monthly","Quarterly","Annually"], correct:1, explain:"Bi-monthly — confirmed multiple times in the application." },
+    { q:"The Skills Matrix sorts employees into three readiness tiers. Which is NOT one of them?", options:["Ready now","1–3 years","3–5 years","5+ years"], correct:3, explain:"Ready now, 1–3 years, and 3–5 years — there's no \u201c5+ years\u201d tier." },
+    { q:"What office was established in 2023 through the Governance Accountability Cycles of Learning?", options:["Office of Professional and Ethical Standards (OPES)","Office of Strategic Excellence (OSE)","Office of the City Manager (OCM)","Office of Internal Audit (OIA)"], correct:0, explain:"OPES — integrated with the Leadership System and PRIDE values." },
+    { q:"How many steps are in the Relationship Building Process for community partnerships?", options:["4","5","6","7"], correct:3, explain:"7 steps — built on shared goals, aligned resources, and trusted partnerships." },
+  ]
+},
+{
+  id:"strategy", eyebrow:"CATEGORY 2", title:"Strategy",
+  slides:[
+    { h:"The Strategic Planning Process (SPP)", t:"A 7-step, data-driven process carrying the City from assessing where it is through deploying action plans and monitoring results. The Board of Commissioners approves the MVV during Step 2.", img:"assets/sp-1.1-spp.png", fig:"Figure SP 1.1" },
+    { h:"Align Team Pharr (ATP)", t:"The framework connecting leadership, strategy, workforce, and operations across all 27 departments — the SPP is fully integrated with it.", img:"assets/sp-1.2-atp.png", fig:"Figure SP 1.2" },
+    { h:"Action Plan Development & Deployment", t:"Once strategic objectives are set, departments build action plans with assigned owners, timelines, and measurable targets during Steps 3–5 of the SPP.", img:"assets/sp-2.1-action-plan.png", fig:"Figure SP 2.1" },
+    { h:"Evaluating Strategy", t:"In Step 7 of the SPP, the City evaluates organizational effectiveness through multiple review cycles: monthly KPI reviews, monthly Strengths & Opportunities (S&O) Reports, and quarterly Strategic Alignment Sessions (SAS).", img:"assets/sp-3.1-evaluation.png", fig:"Figure SP 3.1" },
+    { h:"Pursuing Innovation", t:"The City systematically assesses its current state to identify strategic opportunities and innovation — defined as discontinuous or breakthrough improvement that's new to the intended application and creates new value.", img:"assets/sp-4.1-innovation.png", fig:"Figure SP 4.1" },
+    { h:"Innovation & Technology Assessment", t:"A 5-step process evaluating new technology — including AI — before adoption, weighing both technical capability and impact on service delivery.", img:"assets/sp-5.1-tech-assessment.png", fig:"Figure SP 5.1" },
+    { h:"Three-Part Approach to Capital", t:"How the City ensures access to capital for short-term needs, periods of disruption, and long-term success — integrated through Align Team Pharr and reinforced by risk management.", img:"assets/sp-6.1-capital.png", fig:"Figure SP 6.1" },
+  ],
+  results:[
+    { img:"assets/sr-1.1-property-value.png", cap:"Total Property Value per Square Mile" },
+    { img:"assets/sr-1.3-pharrconnect-share.png", cap:"PharrConnect Market Share" },
+    { img:"assets/sr-2.1-liquidity.png", cap:"Total Cash Liquidity Days" },
+  ],
+  quiz:[
+    { q:"How many steps make up the Strategic Planning Process (SPP)?", options:["5","6","7","8"], correct:2, explain:"7 steps, from assessment through deployment and evaluation." },
+    { q:"Which framework connects leadership, strategy, workforce, and operations across all 27 departments?", options:["Align Team Pharr (ATP)","The Pharr Way","P2027 Strategic Plan","Excellence Every Day"], correct:0, explain:"Align Team Pharr (ATP) — the SPP is fully integrated with it." },
+    { q:"During which step of the SPP does the Board of Commissioners approve the MVV?", options:["Step 1","Step 2","Step 5","Step 7"], correct:1, explain:"Step 2 — the BOC establishes strategic direction and approves the MVV." },
+    { q:"How does Pharr define \u201cinnovation\u201d in its strategy process?", options:["Any new software purchase","Discontinuous/breakthrough improvement, new to the application, that creates new value","Any idea submitted through STEP","A 10% or greater cost reduction"], correct:1, explain:"Innovation specifically means breakthrough change — not just incremental improvement." },
+    { q:"What does the Three-Part Approach to Capital give the City access to?", options:["Grant funding only","Capital for short-term needs, disruptions, and long-term goals","Bond financing only","Emergency federal aid only"], correct:1, explain:"All three: short-term needs, periods of disruption, and long-term success." },
+  ]
+},
+{
+  id:"customers", eyebrow:"CATEGORY 3", title:"Customers",
+  slides:[
+    { h:"Listen, Learn, and Act", t:"The 3-part cycle underneath every resident-listening effort — capturing the Voice of the Customer, analyzing input, defining and implementing improvements, then communicating results back to the community.", img:"assets/cp-1.1-listen-learn-act.png", fig:"Figure CP 1.1" },
+    { h:"Customer Engagement and Relationship Management", t:"A systematic 6-step cycle — Connect, Understand, Engage, Deliver, Measure, Improve — that builds and sustains resident relationships over time.", img:"assets/cp-2.1-cerm.png", fig:"Figure CP 2.1" },
+    { h:"Complaint Management", t:"Pharr 311 is the City's primary complaint and service-request platform: every submission across 70 service types gets auto time-stamped and routed with a complete audit trail.", img:"assets/cp-4.1-complaints.png", fig:"Figure CP 4.1" },
+    { h:"Cycles of Evaluation and Improvement", t:"This is where the Pharr FIRST Customer Service Committee and the Pharr Communication Script came from — established 2024–2025 to standardize how every department greets and interacts with residents.", img:"assets/cp-2.3-cycles.png", fig:"Figure CP 2.3" },
+  ],
+  results:[
+    { img:"assets/cr-1.1-satisfaction.png", cap:"Overall Resident Satisfaction by City Segment" },
+    { img:"assets/cr-2.1-dissatisfaction.png", cap:"Overall Resident Dissatisfaction" },
+    { img:"assets/cr-3.1-retention.png", cap:"PharrConnect Retention Rate" },
+    { img:"assets/cr-3.3-app-downloads.png", cap:"311 App Downloads" },
+  ],
+  quiz:[
+    { q:"What three actions make up the Listen, Learn, and Act cycle?", options:["Survey, Analyze, Report","Listen, Learn, and Act","Ask, Answer, Archive","Collect, Compare, Communicate"], correct:1, explain:"The process name is literally the three actions." },
+    { q:"The Customer Engagement and Relationship Management Process has 6 steps. Which is the FIRST?", options:["Understand","Connect","Deliver","Measure"], correct:1, explain:"Connect → Understand → Engage → Deliver → Measure → Improve." },
+    { q:"Pharr 311 auto time-stamps and tracks resident requests across how many service types?", options:["30","50","70","100"], correct:2, explain:"70 service types, each with a full audit trail." },
+    { q:"What standardized customer interaction tool did the Pharr FIRST Committee establish?", options:["The Pharr Communication Script","The Voice of Customer Survey","The Customer Requirements Matrix","The 311 Complaint Code"], correct:0, explain:"The Pharr Communication Script — the same greeting/interaction standard across every department." },
+    { q:"When was the Pharr FIRST Customer Service Committee established?", options:["2018–2019","2021–2022","2024–2025","2026 only"], correct:2, explain:"2024–2025, to standardize service delivery across departments." },
+  ]
+},
+{
+  id:"intelligence", eyebrow:"CATEGORY 4", title:"Organizational Intelligence",
+  slides:[
+    { h:"Performance Management Process", t:"A repeatable cycle led by OSE: plan & prepare measures, monitor & analyze results, review performance & act. OSE partners with SLs to align measures with the Strategic Plan and build department scorecards.", img:"assets/oip-1.1-performance-mgmt.png", fig:"Figure OIP 1.1" },
+    { h:"STEP", t:"Study, Track, Evaluate, Propose — Pharr's continuous improvement methodology, deployed across all 27 departments. Before STEP, OSE tested PDSA (Plan-Do-Study-Act) and found employees needed something simpler.", img:"assets/oip-2.1-step.png", fig:"Figure OIP 2.1" },
+    { h:"Choosing Which Innovations to Pursue", t:"OSE assesses opportunities against four criteria: Evidence of Impact, Strategic Alignment, Feasibility, and Scalability/Sustainability. Every STEP submission gets one of four statuses: In-Progress, On-Hold, Adopted, or Not Adopted." },
+    { h:"Knowledge Management Process", t:"A four-stage cycle: Knowledge Creation (gathering input), Knowledge Capture (documenting it), Knowledge Sharing (distributing it to the right audience), and Knowledge Application (using it to drive decisions).", img:"assets/oip-4.1-knowledge-mgmt.png", fig:"Figure OIP 4.1" },
+  ],
+  results:[],
+  quiz:[
+    { q:"What do the four letters in STEP stand for?", options:["Study, Track, Evaluate, Propose","Strategize, Test, Execute, Publish","Set, Track, Enact, Plan","Study, Try, Evaluate, Perform"], correct:0, explain:"Study, Track, Evaluate, Propose — used in all 27 departments." },
+    { q:"What quality-improvement model did OSE test before landing on STEP?", options:["Six Sigma","Lean","PDSA (Plan-Do-Study-Act)","Kaizen"], correct:2, explain:"PDSA — OSE found employees needed something simpler, and adapted it into STEP." },
+    { q:"Which of these is NOT one of the four criteria OSE uses to assess an innovation opportunity?", options:["Evidence of Impact","Strategic Alignment","Employee Popularity","Feasibility"], correct:2, explain:"The four are Evidence of Impact, Strategic Alignment, Feasibility, and Scalability/Sustainability — popularity isn't one of them." },
+    { q:"What are the four statuses OSE can assign to a STEP submission?", options:["Pass, Fail, Hold, Retry","In-Progress, On-Hold, Adopted, Not Adopted","New, Reviewed, Closed, Archived","Approved, Denied, Pending, Escalated"], correct:1, explain:"In-Progress, On-Hold, Adopted, or Not Adopted." },
+    { q:"What is the first stage of the Knowledge Management Process?", options:["Knowledge Sharing","Knowledge Application","Knowledge Creation","Knowledge Capture"], correct:2, explain:"Knowledge Creation comes first — gathering input from employees, residents, and operational data." },
+  ]
+},
+{
+  id:"workforce", eyebrow:"CATEGORY 5", title:"Workforce",
+  slides:[
+    { h:"Workforce Engagement System (WES)", t:"Moves employees through three stages: Recruit & Onboard, Engage, and Develop — a continuous cycle deployed across all 27 departments.", img:"assets/wp-1.1-wes.png", fig:"Figure WP 1.1" },
+    { h:"Onboarding & Engagement Drivers", t:"New hires get a five-day orientation, paired with a Senior Leader mentor, a 60-day pulse check, and a 90-day breakfast with City leaders. Engagement is validated against Gallup's Q12 framework — 22% of employees cite hometown pride as a top driver." },
+    { h:"Workforce Development Process", t:"Three ongoing learning pathways — Pharr U, Pathway to Leadership, and the P.H.A.R.R. Academy (Public Hazards Alert Ready Response) — coordinated by HR's Workforce Development Division.", img:"assets/wp-2.1-development.png", fig:"Figure WP 2.1" },
+    { h:"Workforce Readiness Process", t:"A 6-step process letting departments, SLs, HR, and Finance review the impact of change and align staffing, training, and resources with what's actually needed — plus the On Your Turf initiative, where HR meets employees at their own worksites.", img:"assets/wp-3.1-readiness.png", fig:"Figure WP 3.1" },
+  ],
+  results:[
+    { img:"assets/wr-2.1-satisfaction.png", cap:"Overall Workforce Satisfaction" },
+    { img:"assets/wr-4.1-90day-turnover.png", cap:"90-Day Employee Turnover" },
+    { img:"assets/wr-6.2-training-days.png", cap:"Training Days per Full-Time Employee" },
+    { img:"assets/wr-5.1-pathway-graduates.png", cap:"Pathway to Leadership Graduates Promoted" },
+  ],
+  quiz:[
+    { q:"What three stages make up the Workforce Engagement System?", options:["Hire, Train, Retain","Recruit & Onboard, Engage, Develop","Attract, Assess, Assign","Screen, Select, Support"], correct:1, explain:"Recruit & Onboard, Engage, Develop — a continuous cycle." },
+    { q:"Who is every new employee paired with during onboarding?", options:["An HR generalist","A peer buddy","A Senior Leader (SL) mentor","The City Manager"], correct:2, explain:"A Senior Leader mentor, specifically for cultural reinforcement." },
+    { q:"What percentage of employees cite hometown pride as a top engagement driver?", options:["12%","22%","32%","42%"], correct:1, explain:"22% — tied to the \u201cjob has purpose\u201d engagement dimension." },
+    { q:"What does P.H.A.R.R. stand for in the P.H.A.R.R. Academy?", options:["Pharr Has A Rewarding Role","Public Hazards Alert Ready Response","People Helping Achieve Real Results","Professional Habits And Readiness Review"], correct:1, explain:"Public Hazards Alert Ready Response — an emergency-management training academy." },
+    { q:"What initiative sends HR out to departments instead of requiring staff to come to HR?", options:["Town Halls","On Your Turf","Pathway to Leadership","The 90-Day Breakfast"], correct:1, explain:"On Your Turf — HR meets employees where they work." },
+  ]
+},
+{
+  id:"operations", eyebrow:"CATEGORY 6", title:"Operations",
+  slides:[
+    { h:"Customer Requirements Determination", t:"A 5-step process, beginning with Voice of the Customer listening channels, that identifies, prioritizes, and turns resident feedback into concrete service requirements.", img:"assets/op-1.1-requirements.png", fig:"Figure OP 1.1" },
+    { h:"Designing Products, Services, and Programs", t:"Turns those requirements into new or improved services, tested through pilots before full rollout — evaluated using KPI results, customer feedback, benchmarking, and strategic reviews.", img:"assets/op-2.1-design.png", fig:"Figure OP 2.1" },
+    { h:"Supply Network Management", t:"How the Purchasing Department qualifies and selects vendors through Procureware — the platform vendors use to register and receive bid notifications.", img:"assets/op-4.1-supply-network.png", fig:"Figure OP 4.1" },
+    { h:"Risk Management and Resilience", t:"An integrated framework including the NIST Cybersecurity Framework, built around three vectors: people, technology, and policy.", img:"assets/op-5.1-risk-mgmt.png", fig:"Figure OP 5.1" },
+    { h:"Safety and Security Process", t:"Identifies and assesses risks, then implements controls to protect residents and staff — tied into the same Risk Management framework as the cybersecurity program.", img:"assets/op-7.1-safety-security.png", fig:"Figure OP 7.1" },
+  ],
+  results:[
+    { img:"assets/or-1.1-crime-rate.png", cap:"Crime Rate per 1K Residents" },
+    { img:"assets/or-2.3-water-violations.png", cap:"Drinking Water Violations" },
+    { img:"assets/or-4.2-cybersecurity.png", cap:"Cybersecurity — Attempts vs. Incidents" },
+    { img:"assets/or-1.2-uptime.png", cap:"Critical Systems Uptime" },
+  ],
+  quiz:[
+    { q:"How many steps make up the Customer Requirements Determination Process?", options:["3","4","5","6"], correct:2, explain:"5 steps, beginning with Voice of the Customer listening channels." },
+    { q:"What does the Design Process do before a new service goes to full rollout?", options:["Nothing — it launches immediately","A budget review only","Pilot testing","A resident vote"], correct:2, explain:"Pilot testing — validating the design before citywide deployment." },
+    { q:"What platform do vendors use to register and receive City bid notifications?", options:["Procureware","PharrConnect","Trackstar","ClearGov"], correct:0, explain:"Procureware, managed by the Purchasing Department." },
+    { q:"What three vectors does the NIST Cybersecurity Framework organize the City's protections around?", options:["Hardware, Software, Network","People, Technology, Policy","Prevention, Detection, Response","Budget, Staff, Training"], correct:1, explain:"People, technology, and policy." },
+    { q:"What process identifies and assesses risks to protect both residents and staff?", options:["The Safety and Security Process","The Design Process","Supply Network Management","Complaint Management"], correct:0, explain:"The Safety and Security Process, tied into the broader Risk Management framework." },
+  ]
+},
+{
+  id:"results-cat", eyebrow:"CATEGORY 7", title:"Results",
+  slides:[
+    { h:"The Numbers That Prove It Out", t:"Category 7 doesn't introduce new processes — it's where every process from the last six categories gets judged on outcomes. A few headline figures worth knowing cold." },
+    { h:"Citizen Satisfaction", t:"Overall satisfaction on the Annual Citizen Survey climbed from 70% (FY 2020) to 90% (FY 2026) — a 20 percentage-point gain, and above the USA top quartile benchmark." },
+    { h:"Community & Fiscal Growth", t:"Active community partnerships have grown to 37. The City's operating budget grew 21.3% from FY 2020 to FY 2025 — funding the service expansion behind an estimated 2025 population of 81,145." },
+    { h:"Operational Wins", t:"After a STEP-driven root cause analysis, the Building and Code Department's on-time residential plan review completion rose from 86.92% to 92% — a direct, measurable result of the continuous improvement process covered back in Category 4." },
+  ],
+  results:[],
+  quiz:[
+    { q:"Citizen satisfaction on the Annual Citizen Survey rose to what percentage by FY 2026?", options:["80%","85%","90%","95%"], correct:2, explain:"90% — up from 70% in FY 2020." },
+    { q:"After a STEP-driven improvement effort, on-time residential plan review completion rose to what rate?", options:["86.92%","90%","92%","95%"], correct:2, explain:"92%, up from the original 86.92% baseline." },
+    { q:"How many active community partnerships has the City grown to?", options:["17","27","37","47"], correct:2, explain:"37 active community partnerships." },
+    { q:"How much did Pharr's operating budget grow from FY 2020 to FY 2025?", options:["11.3%","16.3%","21.3%","26.3%"], correct:2, explain:"21.3% growth over that five-year window." },
+    { q:"What is Pharr's estimated population as of 2025?", options:["61,145","71,145","81,145","91,145"], correct:2, explain:"81,145 — the population figure behind every per-capita result in this category." },
+  ]
+},
+];
+
+// ═══════════════════════════════════════════════════════════
+// RESULTS LIBRARY — all curated Tier-2 charts, organized by category
+// (same images used above, plus this is where browsing lives)
+// ═══════════════════════════════════════════════════════════
+const LIBRARY = MODULES.filter(m => m.results.length).map(m => ({ title: m.title, items: m.results }));
+
+// ═══════════════════════════════════════════════════════════
+// STATE & STORAGE
+// ═══════════════════════════════════════════════════════════
+let currentUser = null;
+let userProgress = null; // { name, moduleProgress: {id:{completed,bestScore}}, examBest, certified, certDate, certScore }
+let currentModuleIdx = 0;
+let currentSlideIdx = 0;
+let quizState = null; // {mode:'module'|'exam', moduleIdx, questions, qIdx, score, answered}
+
+function slugify(name){ return name.trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
+
+function freshProgress(name){
+  const mp = {};
+  MODULES.forEach(m => mp[m.id] = { completed:false, bestScore:0 });
+  return { name, moduleProgress: mp, examBest: 0, certified:false, certDate:null, certScore:null, lastActive: Date.now() };
+}
+
+async function handleEnter(){
+  const input = document.getElementById('name-input');
+  const name = input.value.trim();
+  const statusEl = document.getElementById('landing-status');
+  if (!name) { statusEl.textContent = 'Please enter your name.'; return; }
+  statusEl.textContent = 'Loading...';
+  const key = 'progress:' + slugify(name);
+  try {
+    let result;
+    try { result = await window.storage.get(key, false); } catch(e){ result = null; }
+    if (result && result.value) {
+      userProgress = JSON.parse(result.value);
+      userProgress.name = name;
+    } else {
+      userProgress = freshProgress(name);
+    }
+    currentUser = name;
+    userProgress.lastActive = Date.now();
+    await saveProgress();
+    enterApp();
+  } catch(e) {
+    statusEl.textContent = 'Could not load progress, starting fresh in this session.';
+    userProgress = freshProgress(name);
+    currentUser = name;
+    enterApp();
+  }
+}
+
+async function saveProgress(){
+  if (!currentUser) return;
+  const key = 'progress:' + slugify(currentUser);
+  try { await window.storage.set(key, JSON.stringify(userProgress), false); } catch(e){ console.error('save failed', e); }
+  // also push a lightweight summary to shared roster
+  try {
+    const rosterKey = 'roster:' + slugify(currentUser);
+    const doneCount = Object.values(userProgress.moduleProgress).filter(m=>m.completed).length;
+    const summary = {
+      name: userProgress.name,
+      modulesDone: doneCount,
+      totalModules: MODULES.length,
+      certified: userProgress.certified,
+      certDate: userProgress.certDate,
+      lastActive: userProgress.lastActive
+    };
+    await window.storage.set(rosterKey, JSON.stringify(summary), true);
+  } catch(e) { console.error('roster save failed', e); }
+}
+
+function enterApp(){
+  document.getElementById('screen-landing').classList.remove('active');
+  document.getElementById('screen-app').classList.add('active');
+  document.getElementById('user-chip-name').textContent = currentUser;
+  document.getElementById('dash-name-suffix').textContent = ', ' + currentUser.split(' ')[0];
+  buildTourPanes();
+  buildNav();
+  refreshDashboard();
+  showPane('dashboard');
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════════════
+function buildNav(){
+  const nav = document.getElementById('nav-list');
+  nav.innerHTML = '';
+  MODULES.forEach((m,i)=>{
+    const done = userProgress.moduleProgress[m.id].completed;
+    const item = document.createElement('div');
+    item.className = 'nav-item' + (currentModuleIdx===i && activePaneId()==='module' ? ' active':'') + (done?' done':'');
+    item.innerHTML = `<div class="nav-num">${i+1}</div><span>${m.title}</span>`;
+    item.onclick = () => openModule(i);
+    nav.appendChild(item);
+  });
+  updateProgressBar();
+  document.getElementById('nav-cert').style.display = userProgress.certified ? 'flex' : 'none';
+}
+let _activePane = 'dashboard';
+function activePaneId(){ return _activePane; }
+
+function updateProgressBar(){
+  const done = Object.values(userProgress.moduleProgress).filter(m=>m.completed).length;
+  const pct = Math.round((done/MODULES.length)*100);
+  document.getElementById('progress-fill').style.width = pct+'%';
+  document.getElementById('progress-pct').textContent = pct+'%';
+}
+
+function showPane(name){
+  _activePane = name;
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  const map = { dashboard:'pane-dashboard', library:'pane-library', 'exam-intro':'pane-exam-intro', certificate:'pane-certificate', roster:'pane-roster' };
+  if (map[name]) {
+    document.getElementById(map[name]).classList.add('active');
+    if (name==='dashboard') refreshDashboard();
+    if (name==='library') buildLibrary();
+    if (name==='exam-intro') refreshExamIntro();
+    if (name==='certificate') refreshCertificate();
+    if (name==='roster') refreshRoster();
+  }
+  buildNav();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function openModule(i){
+  currentModuleIdx = i;
+  currentSlideIdx = 0;
+  _activePane = 'module';
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tour-pane-'+MODULES[i].id).classList.add('active');
+  renderSlide();
+  buildNav();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════
+function refreshDashboard(){
+  const done = Object.values(userProgress.moduleProgress).filter(m=>m.completed).length;
+  document.getElementById('dash-modules-done').textContent = `${done}/${MODULES.length}`;
+  const statusEl = document.getElementById('dash-status');
+  const statusSub = document.getElementById('dash-status-sub');
+  if (userProgress.certified) {
+    statusEl.textContent = 'Certified ✓';
+    statusEl.style.color = 'var(--olive)';
+    statusSub.textContent = `Passed ${userProgress.certScore}% on ${userProgress.certDate}`;
+  } else if (done === MODULES.length) {
+    statusEl.textContent = 'Ready for Exam';
+    statusEl.style.color = 'var(--gold)';
+    statusSub.textContent = 'All modules done — take the Final Exam whenever ready.';
+  } else {
+    statusEl.textContent = 'In Progress';
+    statusEl.style.color = 'var(--gold)';
+    statusSub.textContent = `${MODULES.length - done} module(s) left`;
+  }
+  const list = document.getElementById('dash-module-list');
+  list.innerHTML = '';
+  MODULES.forEach((m,i)=>{
+    const prog = userProgress.moduleProgress[m.id];
+    const row = document.createElement('div');
+    row.className = 'module-row' + (prog.completed?' done':'');
+    row.onclick = () => openModule(i);
+    row.innerHTML = `
+      <div class="mr-num">${i+1}</div>
+      <div class="mr-text"><h4>${m.title}</h4><span>${prog.completed ? 'Completed · best quiz score '+prog.bestScore+'%' : m.slides.length+' slides · '+m.quiz.length+' quiz questions'}</span></div>
+      <div class="mr-arrow">→</div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// GUIDED TOUR
+// ═══════════════════════════════════════════════════════════
+function buildTourPanes(){
+  const container = document.getElementById('tour-panes');
+  container.innerHTML = '';
+  MODULES.forEach((m,mi)=>{
+    const sec = document.createElement('section');
+    sec.className = 'pane';
+    sec.id = 'tour-pane-' + m.id;
+    sec.innerHTML = `
+      <div class="tour-eyebrow">${m.eyebrow}</div>
+      <div class="tour-title">${m.title}</div>
+      <div class="slide-progress" id="slide-progress-${m.id}"></div>
+      <div class="slide-track"><div class="slide-track-fill" id="slide-track-${m.id}"></div></div>
+      <div id="slide-content-${m.id}"></div>
+      <div class="tour-nav">
+        <button class="btn-nav" id="slide-prev-${m.id}" onclick="prevSlide()">← Previous</button>
+        <button class="btn-nav primary" id="slide-next-${m.id}" onclick="nextSlide()">Next →</button>
+      </div>
+    `;
+    container.appendChild(sec);
+  });
+}
+
+function renderSlide(){
+  const m = MODULES[currentModuleIdx];
+  const totalSteps = m.slides.length + (m.results.length ? 1 : 0);
+  const isResultsStep = currentSlideIdx === m.slides.length;
+  document.getElementById('slide-progress-'+m.id).textContent = `STEP ${currentSlideIdx+1} OF ${totalSteps}`;
+  document.getElementById('slide-track-'+m.id).style.width = Math.round(((currentSlideIdx+1)/totalSteps)*100)+'%';
+
+  const contentEl = document.getElementById('slide-content-'+m.id);
+  if (isResultsStep && m.results.length) {
+    contentEl.innerHTML = `
+      <div class="results-highlight-box">
+        <h4>📊 Results at a Glance</h4>
+        <div class="rh-grid">
+          ${m.results.map(r=>`<div class="rh-item"><img src="${r.img}" alt="${r.cap}"><span>${r.cap}</span></div>`).join('')}
+        </div>
+      </div>
+      <div class="quiz-cta">
+        <div class="quiz-cta-text"><h4>Module Quiz</h4><p>${m.quiz.length} questions · check what stuck</p></div>
+        <button class="btn-quiz" onclick="startModuleQuiz(${currentModuleIdx})">TAKE QUIZ</button>
+      </div>
+    `;
+  } else {
+    const s = m.slides[currentSlideIdx];
+    contentEl.innerHTML = `
+      <div class="slide-heading">${s.h}</div>
+      ${s.img ? `<div class="slide-img-wrap"><img src="${s.img}" alt="${s.h}"></div><div class="slide-fig-label">${s.fig||''}</div>` : ''}
+      <div class="slide-text">${s.t}</div>
+      ${currentSlideIdx === m.slides.length - 1 && !m.results.length ? `
+        <div class="quiz-cta">
+          <div class="quiz-cta-text"><h4>Module Quiz</h4><p>${m.quiz.length} questions · check what stuck</p></div>
+          <button class="btn-quiz" onclick="startModuleQuiz(${currentModuleIdx})">TAKE QUIZ</button>
+        </div>` : ''}
+    `;
+  }
+  document.getElementById('slide-prev-'+m.id).disabled = currentSlideIdx===0;
+  const nextBtn = document.getElementById('slide-next-'+m.id);
+  if (currentSlideIdx >= totalSteps-1) { nextBtn.style.display='none'; } else { nextBtn.style.display=''; nextBtn.textContent='Next →'; }
+}
+function prevSlide(){ if(currentSlideIdx>0){ currentSlideIdx--; renderSlide(); window.scrollTo({top:0,behavior:'smooth'}); } }
+function nextSlide(){
+  const m = MODULES[currentModuleIdx];
+  const totalSteps = m.slides.length + (m.results.length?1:0);
+  if (currentSlideIdx < totalSteps-1){ currentSlideIdx++; renderSlide(); window.scrollTo({top:0,behavior:'smooth'}); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// RESULTS LIBRARY
+// ═══════════════════════════════════════════════════════════
+function buildLibrary(){
+  const el = document.getElementById('library-content');
+  el.innerHTML = '';
+  LIBRARY.forEach(cat=>{
+    const title = document.createElement('div');
+    title.className = 'lib-cat-title';
+    title.textContent = cat.title;
+    el.appendChild(title);
+    const grid = document.createElement('div');
+    grid.className = 'lib-grid';
+    cat.items.forEach(item=>{
+      const div = document.createElement('div');
+      div.className = 'lib-item';
+      div.innerHTML = `<img src="${item.img}" alt="${item.cap}"><span>${item.cap}</span>`;
+      grid.appendChild(div);
+    });
+    el.appendChild(grid);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// QUIZ ENGINE (shared by module quizzes + final exam)
+// ═══════════════════════════════════════════════════════════
+function startModuleQuiz(moduleIdx){
+  quizState = { mode:'module', moduleIdx, questions: MODULES[moduleIdx].quiz, qIdx:0, score:0, answered:false };
+  document.getElementById('quiz-overlay').classList.add('active');
+  renderQuizQuestion();
+}
+function shuffleArr(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function startExam(){
+  // Build a 25-question pool: pull questions across all modules, shuffle, cap at 25 (currently 40 total available)
+  let pool = [];
+  MODULES.forEach(m => pool = pool.concat(m.quiz));
+  pool = shuffleArr(pool).slice(0,25);
+  quizState = { mode:'exam', questions: pool, qIdx:0, score:0, answered:false };
+  document.getElementById('quiz-overlay').classList.add('active');
+  renderQuizQuestion();
+}
+function closeQuizOverlay(){
+  document.getElementById('quiz-overlay').classList.remove('active');
+  quizState = null;
+}
+function renderQuizQuestion(){
+  const qs = quizState.questions;
+  const q = qs[quizState.qIdx];
+  const label = quizState.mode==='exam' ? 'FINAL EXAM' : MODULES[quizState.moduleIdx].title.toUpperCase();
+  const body = document.getElementById('quiz-body');
+  body.innerHTML = `
+    <div class="quiz-progress">${label} · QUESTION ${quizState.qIdx+1} OF ${qs.length}</div>
+    <div class="quiz-question">${q.q}</div>
+    <div class="quiz-options" id="quiz-options"></div>
+    <div class="quiz-explain" id="quiz-explain"></div>
+    <div class="quiz-actions">
+      <div class="quiz-score">Score: ${quizState.score}/${quizState.qIdx}</div>
+      <button class="btn-quiz-next" id="quiz-next-btn" onclick="nextQuizQuestion()">Next →</button>
+    </div>
+  `;
+  const optsDiv = document.getElementById('quiz-options');
+  q.options.forEach((opt,oi)=>{
+    const btn = document.createElement('button');
+    btn.className = 'quiz-opt';
+    btn.textContent = opt;
+    btn.onclick = () => answerQuiz(oi);
+    optsDiv.appendChild(btn);
+  });
+  quizState.answered = false;
+}
+function answerQuiz(choiceIdx){
+  if (quizState.answered) return;
+  quizState.answered = true;
+  const q = quizState.questions[quizState.qIdx];
+  document.querySelectorAll('.quiz-opt').forEach((btn,i)=>{
+    btn.disabled = true;
+    if (i===q.correct) btn.classList.add('correct');
+    else if (i===choiceIdx) btn.classList.add('wrong');
+  });
+  if (choiceIdx===q.correct) quizState.score++;
+  document.getElementById('quiz-explain').textContent = q.explain;
+  document.getElementById('quiz-explain').classList.add('active');
+  document.getElementById('quiz-next-btn').classList.add('active');
+  document.querySelector('.quiz-score').textContent = `Score: ${quizState.score}/${quizState.qIdx+1}`;
+}
+async function nextQuizQuestion(){
+  quizState.qIdx++;
+  if (quizState.qIdx >= quizState.questions.length){
+    await renderQuizResult();
+  } else {
+    renderQuizQuestion();
+  }
+}
+async function renderQuizResult(){
+  const pct = Math.round((quizState.score/quizState.questions.length)*100);
+  const body = document.getElementById('quiz-body');
+
+  if (quizState.mode === 'module') {
+    const m = MODULES[quizState.moduleIdx];
+    const prog = userProgress.moduleProgress[m.id];
+    prog.completed = true;
+    prog.bestScore = Math.max(prog.bestScore, pct);
+    await saveProgress();
+    body.innerHTML = `
+      <div class="quiz-result">
+        <h3>${quizState.score}/${quizState.questions.length}</h3>
+        <p>${pct}% on ${m.title} — ${pct>=80?"nice work, that's locked in.":pct>=50?"solid start, worth a re-read.":"worth another pass through this module."}</p>
+        <button class="btn-quiz-done" onclick="finishQuiz()">Back to module</button>
+      </div>`;
+  } else {
+    const passed = pct >= 80;
+    userProgress.examBest = Math.max(userProgress.examBest, pct);
+    if (passed && !userProgress.certified) {
+      userProgress.certified = true;
+      userProgress.certDate = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+      userProgress.certScore = pct;
+    } else if (passed) {
+      userProgress.certScore = Math.max(userProgress.certScore||0, pct);
+    }
+    await saveProgress();
+    body.innerHTML = `
+      <div class="quiz-result ${passed?'pass':'fail'}">
+        <h3>${quizState.score}/${quizState.questions.length} (${pct}%)</h3>
+        <p>${passed ? "You passed! 🎉 Your Pharr Way Certification is ready." : "80% needed to pass — review the modules you missed and try again anytime."}</p>
+        <button class="btn-quiz-done" onclick="finishExam(${passed})">${passed ? 'View Certificate' : 'Back to Dashboard'}</button>
+      </div>`;
+  }
+  buildNav();
+}
+function finishQuiz(){ closeQuizOverlay(); refreshDashboard(); }
+function finishExam(passed){ closeQuizOverlay(); if(passed){ showPane('certificate'); } else { showPane('dashboard'); } }
+
+// ═══════════════════════════════════════════════════════════
+// EXAM INTRO / CERTIFICATE / ROSTER
+// ═══════════════════════════════════════════════════════════
+function refreshExamIntro(){
+  document.getElementById('exam-best-score').textContent = userProgress.examBest ? userProgress.examBest+'%' : '—';
+}
+function refreshCertificate(){
+  document.getElementById('cert-name').textContent = userProgress.name;
+  document.getElementById('cert-score').textContent = (userProgress.certScore||0)+'%';
+  document.getElementById('cert-date').textContent = userProgress.certDate || '—';
+}
+async function refreshRoster(){
+  const tbody = document.getElementById('roster-body');
+  tbody.innerHTML = '<tr><td colspan="4" style="color:var(--grey);">Loading roster…</td></tr>';
+  try {
+    const listResult = await window.storage.list('roster:', true);
+    const keys = (listResult && listResult.keys) || [];
+    const rows = [];
+    for (const k of keys) {
+      try {
+        const r = await window.storage.get(k, true);
+        if (r && r.value) rows.push(JSON.parse(r.value));
+      } catch(e) {}
+    }
+    rows.sort((a,b) => (b.lastActive||0) - (a.lastActive||0));
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="color:var(--grey);">No one has started the course yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r.name}</td>
+        <td>${r.modulesDone}/${r.totalModules}</td>
+        <td>${r.certified ? `<span class="badge certified">Certified — ${r.certDate}</span>` : `<span class="badge progress">In Progress</span>`}</td>
+        <td>${r.lastActive ? new Date(r.lastActive).toLocaleDateString() : '—'}</td>
+      </tr>
+    `).join('');
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--grey);">Roster unavailable right now.</td></tr>';
+  }
+}
+
+// Enter key on landing input
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('name-input').addEventListener('keydown', e=>{ if(e.key==='Enter') handleEnter(); });
+});
+</script>
+</body>
+</html>
